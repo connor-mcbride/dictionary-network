@@ -1,0 +1,246 @@
+\documentclass[12pt,oneside]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[hidelinks]{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{cd}
+\usepackage{mathrsfs}
+\usepackage{cancel}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{esint}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{parskip}
+\usepackage{hyperref}
+\usepackage{placeins}
+\usepackage{subcaption}
+\usepackage{booktabs} 
+\allowdisplaybreaks
+\graphicspath{ {./images/} }
+
+\newenvironment{nouppercase}{%
+    \let\uppercase\relax%
+    \renewcommand{\uppercasenonmath}[1]{}}{}
+
+\titleformat{\section}[block]{\filcenter\Large\bfseries}{\thesection}{1em}{}
+
+% THEOREMS -------------------------------------------------------
+
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+
+\theoremstyle{plain}
+\newtheorem{thm}[equation]{Theorem}
+\newtheorem*{FundClaim*}{Fundamental Claim}
+\newtheorem{lemma}[equation]{Lemma}
+\newtheorem{cor}[equation]{Corollary}
+\newtheorem*{prop}{Proposition}
+\newtheorem{example}[equation]{Example}
+\newtheorem{prob}{Problem}
+
+\theoremstyle{definition}
+\newtheorem{definition}[equation]{Definition}
+\newtheorem{question}[equation]{Question}
+\newtheorem{remark}[equation]{Remark}
+
+
+% MATH -----------------------------------------------------------
+\newcommand{\Q}{\ensuremath \mathbb{Q}}
+\newcommand{\R}{\ensuremath \mathbb{R}}
+\newcommand{\C}{\ensuremath \mathbb{C}}
+\newcommand{\Z}{\ensuremath \mathbb{Z}}
+\newcommand{\N}{\ensuremath \mathbb{N}}
+\newcommand{\M}{\ensuremath \mathbb{M}}
+\newcommand{\F}{\ensuremath \mathbb{F}}
+\newcommand{\Ord}{\text{Ord}}
+
+\newcommand{\lxor}{\underline{\lor}}
+\newcommand{\lnor}{\overline{\lor}}
+\newcommand{\lnand}{\overline{\land}}
+\newcommand{\dom}[1]{\text{dom}(#1)}
+\newcommand{\ran}[1]{\text{ran}(#1)}
+\newcommand{\rref}[1]{#1^\text{ref}}
+\newcommand{\rsym}[1]{#1^\text{sym}}
+\newcommand{\rtran}[1]{#1^\text{tran}}
+\newcommand{\rirref}[1]{#1^\text{irref}}
+\newcommand{\rasym}[1]{#1^\text{asym}}
+\newcommand{\rantisym}[1]{#1^\text{antisym}}
+\newcommand{\rintran}[1]{#1^\text{intran}}
+\newcommand{\ldef}{\text{iff}_\text{def}}
+\newcommand{\lub}[1]{\text{lub}_#1}
+\newcommand{\glb}[1]{\text{glb}_#1}
+\newcommand{\canon}[1]{#1_{\text{canon}}}
+\newcommand{\pset}[2][]{\mathcal{P}^{#1}(#2)}
+\newcommand{\fset}[2][]{\mathcal{F}^{#1}(#2)}
+\newcommand{\restrict}[2]{#1\mid_{#2}}
+\newcommand{\ceil}[1]{\lceil #1 \rceil}
+\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+\newcommand{\Log}{\text{Log}}
+\newcommand{\Arg}{\text{Arg}}
+\newcommand{\Arcsin}{\text{Arcsin}}
+\newcommand{\Res}{\text{Res}}
+\newcommand{\mbf}[1]{\mathbf{#1}}
+\newcommand\ddfrac[2]{\frac{\displaystyle #1}{\displaystyle #2}}
+\newcommand{\inner}[1]{\left\langle #1 \right\rangle}
+\newcommand{\deriv}[3][]{\frac{\mathrm{d}^{#1}#2}{\mathrm{d}{#3}^{#1}}}
+\renewcommand{\epsilon}{\varepsilon}
+\providecommand{\Tau}{\mathrm{T}}
+
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}%
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}%
+
+\makeatletter
+\let\oldabs\abs
+\def\abs{\@ifstar{\oldabs}{\oldabs*}}
+
+\let\oldnorm\norm
+\def\norm{\@ifstar{\oldnorm}{\oldnorm*}}
+\makeatother
+
+\title{Math 525 Project Report}
+\author{Connor McBride}
+\date{Webster's Unabridged English Dictionary}
+
+\begin{document}
+
+\maketitle
+
+\section{Sourcing the Data}
+
+The source of the data comes from the 2009 English \textit{Webster's Unabridged Dictionary} made available as an eBook by Project Gutenberg \cite{webster_unabridged_dict_2009}. 
+I used a repository by Matthew Reagan \cite{reagan_webstersenglishdictionary} to parse the eBook file and turn the dictionary into JSON format. Downloading the JSON file, I was then able to write a Python script \cite{mcbride_dictionary_network} that would convert the data into a NetworkX \cite{hagberg2008exploring} directed graph for analysis.
+
+To generate the network, we first went through dictionary and created a node for each word that has a definition in the dictionary. We then iterated through each definition and created a directed edge from the word being defined to each other word appearing in its definition if that word in the definition is also defined. The weights for the edges are the number of times that the word appears in the definition.
+\begin{figure}[!h]
+\begin{center}
+    \includegraphics[scale=0.5]{edge_example.png}
+\end{center}
+    \caption{An example of edge creation. Five weighted edges are created in total, Two weighted edges are created from `disgraduate' to `to' and `degrade' with edge weight corresponding to the number of times it appears in the definition. `Obs' and `Tyndale' are not defined and therefore no edges are created to these words.}
+    \label{fig:edge_example}
+\end{figure}
+
+\section{Network Analysis}
+
+\subsection{Basic Structure}
+The basic structure of the dictionary network is given in Table \ref{tab:basic_properties}. Certain definitions contained examples sentences using the word in them, meaning that we had 24,872 self-loops in the network. For certain calculations such as the k-cores, we had to remove the self-loops as the algorithm wouldn't work with them.
+
+\begin{table}[!hbtp]
+\centering
+\begin{tabular}{c c c}
+\textbf{Number of Nodes} & \textbf{Number of Edges} & \textbf{Edge Type} \\ 
+\hline
+102,217 & 1,704,423 & Directed; weighted
+\end{tabular}
+\caption{Basic Properties of dictionary network.}
+\label{tab:basic_properties}
+\end{table}
+
+\subsection{Centralities}
+Computing the centrality measures for the dictionary network presented some computational challenges due to the large number of nodes and edges. To deal with these issues, we used a combination of sparse array operations in SciPy \cite{virtanen2020scipy} with the adjacency matrix and the igraph package \cite{csardi2006igraph} which implements the centrality algorithms in C.
+
+The eigenvector and Katz centalities could be interpreted as ``process'' words that are useful when defining words. Betweenness centrality could be interpreted as the most common vocabulary words used. In-degree can be interpreted as the most utilized words in definitions while out-degree can be seen as the longest/most verbose definitions. In particular, `run' and `set' have the most definitions in the dictionary, which could help explain their high centrality measures. The top 4 words for each centrality can be found in Figure \ref{fig:centrality_measures}.
+
+\begin{figure}[ht]
+\centering
+
+\begin{subfigure}[t]{0.30\linewidth}
+\centering
+\caption{Eigenvector}
+\begin{tabular}{lc}
+\toprule
+Word & Centrality \\
+\midrule
+set  & 0.0004389 \\
+run  & 0.0004184 \\
+take & 0.0004115 \\
+turn & 0.0003981 \\
+\bottomrule
+\end{tabular}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.30\linewidth}
+\centering
+\caption{Betweenness}
+\begin{tabular}{lc}
+\toprule
+Word & Centrality \\
+\midrule
+a   & 0.02968116 \\
+of  & 0.02508660 \\
+to  & 0.02088582 \\
+see & 0.01153032 \\
+\bottomrule
+\end{tabular}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.30\linewidth}
+\centering
+\caption{Katz}
+\begin{tabular}{lc}
+\toprule
+Word & Centrality \\
+\midrule
+set  & 1.7745e--05 \\
+run  & 1.6958e--05 \\
+turn & 1.6621e--05 \\
+take & 1.6354e--05 \\
+\bottomrule
+\end{tabular}
+\end{subfigure}
+
+\vspace{1em}
+
+\begin{subfigure}[t]{0.45\linewidth}
+\centering
+\caption{In-degree}
+\begin{tabular}{lc}
+\toprule
+Word & Degree \\
+\midrule
+a   & 59{,}405 \\
+of  & 57{,}317 \\
+the & 52{,}744 \\
+or  & 45{,}817 \\
+\bottomrule
+\end{tabular}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.45\linewidth}
+\centering
+\caption{Out-degree}
+\begin{tabular}{lc}
+\toprule
+Word & Degree \\
+\midrule
+set  & 750 \\
+run  & 674 \\
+turn & 645 \\
+take & 617 \\
+\bottomrule
+\end{tabular}
+\end{subfigure}
+
+\caption{Centrality and degree statistics for dictionary network.}
+\label{fig:centrality_measures}
+\end{figure}
+
+\subsection{Connected Components}
+
+\subsection{Community Detection}
+
+\section{Real World Properties}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Bibliography below
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\FloatBarrier % Keep the figures from being put after the bibliography
+\newpage
+\bibliography{refs}
+\bibliographystyle{alpha}
+
+\end{document}
