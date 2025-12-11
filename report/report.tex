@@ -230,10 +230,121 @@ take & 617 \\
 \end{figure}
 
 \subsection{Connected Components}
+Examining the connected components, we see there are 573 weak components and 73,039 strong components. As demonstrated in Figure \ref{fig:component_distributions}, the majority of components are quite small with just one large component.
+The largest strong component contains 27,637 words, while the largest weak component contains 101,642 nodes. This means that 99.4\% of words are weakly reachable to each other. The small strong components are usually made up of different words that are part of the same word family, e.g. ``lawyerlike'' and ``lawyerly.''
+
+\begin{figure}[ht]
+\centering
+
+\begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{weak_components.png}
+    \label{fig:first}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{strong_components.png}
+    \label{fig:second}
+\end{subfigure}
+
+\caption{Plotted distributions of sizes of weak and strong components.}
+\label{fig:component_distributions}
+\end{figure}
 
 \subsection{Community Detection}
+We employed the Leiden Algorithm written in C++ by the leidenalg package \cite{traag2019leiden} for directed modularity groups. There are 621 detected communities with the largest one of size 33,285. 
+The largest communities contained very common words while the smallest communities were often made up of word families. The most interesting communities that contained words making up specific scientific disciplines or other niche subjects. Three of which are shown in Figure \ref{fig:community_examples}.
+
+We then build a meta graph, which takes uses detected communities as nodes and inter-community edges as edges. Examining the active meta-graph of the Leiden communities (nodes with inter-community edges), we can see that four communities are very influential, with edges connecting with 80-96\% of the other communities.
+
+\begin{figure}[!htbp]
+\begin{center}
+    \includegraphics[scale=0.5]{community_sizes.png}
+\end{center}
+    \caption{Sizes of detected communities.}
+    \label{fig:community_sizes}
+\end{figure}
+
+\begin{figure}[!htbp]
+\centering
+
+\begin{subfigure}[t]{0.31\linewidth}
+\centering
+\caption{Seismic Community}
+\begin{tabular}{l}
+\toprule
+Earthdin \\
+Anaseismic \\
+Terremote \\
+Earthquake \\
+Earthshock \\
+Earthquave \\
+\bottomrule
+\end{tabular}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.31\linewidth}
+\centering
+\caption{Pre-historic Community}
+\begin{tabular}{l}
+\toprule
+Paleolithic \\
+Neanderthal \\
+Supraciliary \\
+Dolichocephaly \\
+Superciliary \\
+\bottomrule
+\end{tabular}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.31\linewidth}
+\centering
+\caption{Infernal Community}
+\begin{tabular}{l}
+\toprule
+Satanical \\
+Erebus \\
+Devilish \\
+Infernal \\
+Hellish \\
+Diabolical \\
+Fiendlike \\
+\bottomrule
+\end{tabular}
+\end{subfigure}
+
+\caption{Three semantic communities computed along with appropriate nicknames.}
+\label{fig:community_examples}
+\end{figure}
+
+\subsection{K-Core Analysis}
+We next examine the $k$-cores of the dictionary network. The largest $k$-core was of degree 121 with 521 words. The largest $k$-cores were surprisingly large, as the cores of size $110+$ contained thousands of words. Sampling example words from the different sizes of $k$-cores reveals that the cores of size $1-50$ contain the more obscure words, while words in cores of size $120+$ contain those that make up the semantic backbone of the dictionary \ref{tab:kcore_samples}.
+
+\begin{table}[!hbtp]
+\centering
+\begin{tabular}{c c}
+\textbf{Core Size} & \textbf{Examples} \\ 
+\hline
+1-50 & anopheles, sarong, turcoman, corrugator \\
+120+ & I, most, some rest
+\end{tabular}
+\caption{Example words for different $k$-core sizes.}
+\label{tab:kcore_samples}
+\end{table}
 
 \section{Real World Properties}
+
+\subsection{Power Law}
+The degree histogram seems to the scale free pattern.
+
+\begin{figure}[!htbp]
+\begin{center}
+    \includegraphics[scale=0.5]{power_law.png}
+\end{center}
+    \caption{Power law curve fit to degrees histogram.}
+    \label{fig:power_law}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Bibliography below
