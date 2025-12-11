@@ -115,12 +115,12 @@
 The source of the data comes from the 2009 English \textit{Webster's Unabridged Dictionary} made available as an eBook by Project Gutenberg \cite{webster_unabridged_dict_2009}. 
 I used a repository by Matthew Reagan \cite{reagan_webstersenglishdictionary} to parse the eBook file and turn the dictionary into JSON format. Downloading the JSON file, I was then able to write a Python script \cite{mcbride_dictionary_network} that would convert the data into a NetworkX \cite{hagberg2008exploring} directed graph for analysis.
 
-To generate the network, we first went through dictionary and created a node for each word that has a definition in the dictionary. We then iterated through each definition and created a directed edge from the word being defined to each other word appearing in its definition if that word in the definition is also defined. The weights for the edges are the number of times that the word appears in the definition.
+To generate the network, we first went through dictionary and created a node for each word that has a definition in the dictionary. We then iterated through each definition and created a directed edge from the word being defined to each other word appearing in its definition if that word in the definition is also defined. The weights for the edges are the number of times that the word appears in the definition (See Table \ref{fig:edge_example} for example).
 \begin{figure}[!h]
 \begin{center}
     \includegraphics[scale=0.5]{edge_example.png}
 \end{center}
-    \caption{An example of edge creation. Five weighted edges are created in total, Two weighted edges are created from `disgraduate' to `to' and `degrade' with edge weight corresponding to the number of times it appears in the definition. `Obs' and `Tyndale' are not defined and therefore no edges are created to these words.}
+    \caption{An example of edge creation. Five weighted edges are created in total, Two weighted edges are created from ``disgraduate'' to ``to'' and ``degrade'' with edge weight corresponding to the number of times it appears in the definition. ``Obs'' and ``Tyndale'' are not defined and therefore no edges are created to these words.}
     \label{fig:edge_example}
 \end{figure}
 
@@ -143,7 +143,7 @@ The basic structure of the dictionary network is given in Table \ref{tab:basic_p
 \subsection{Centralities}
 Computing the centrality measures for the dictionary network presented some computational challenges due to the large number of nodes and edges. To deal with these issues, we used a combination of sparse array operations in SciPy \cite{virtanen2020scipy} with the adjacency matrix and the igraph package \cite{csardi2006igraph} which implements the centrality algorithms in C.
 
-The eigenvector and Katz centalities could be interpreted as ``process'' words that are useful when defining words. Betweenness centrality could be interpreted as the most common vocabulary words used. In-degree can be interpreted as the most utilized words in definitions while out-degree can be seen as the longest/most verbose definitions. In particular, `run' and `set' have the most definitions in the dictionary, which could help explain their high centrality measures. The top 4 words for each centrality can be found in Figure \ref{fig:centrality_measures}.
+The eigenvector and Katz centalities could be interpreted as ``process'' words that are useful when defining words. Betweenness centrality could be interpreted as the most common vocabulary words used. In-degree can be interpreted as the most utilized words in definitions while out-degree can be seen as the longest/most verbose definitions. In particular, ``run'' and ``set'' have the most definitions in the dictionary, which could help explain their high centrality measures. The top 4 words for each centrality can be found in Figure \ref{fig:centrality_measures}.
 
 \begin{figure}[ht]
 \centering
@@ -319,7 +319,7 @@ Fiendlike \\
 \end{figure}
 
 \subsection{K-Core Analysis}
-We next examine the $k$-cores of the dictionary network. The largest $k$-core was of degree 121 with 521 words. The largest $k$-cores were surprisingly large, as the cores of size $110+$ contained thousands of words. Sampling example words from the different sizes of $k$-cores reveals that the cores of size $1-50$ contain the more obscure words, while words in cores of size $120+$ contain those that make up the semantic backbone of the dictionary \ref{tab:kcore_samples}.
+We next examine the $k$-cores of the dictionary network. The largest $k$-core was of degree 121 with 521 words. The largest $k$-cores were surprisingly large, as the cores of size $110+$ contained thousands of words. Sampling example words from the different sizes of $k$-cores reveals that the cores of size $1-50$ contain the more obscure words, while words in cores of size $120+$ contain those that make up the semantic backbone of the dictionary (Table \ref{tab:kcore_samples}).
 
 \begin{table}[!hbtp]
 \centering
@@ -336,15 +336,37 @@ We next examine the $k$-cores of the dictionary network. The largest $k$-core wa
 \section{Real World Properties}
 
 \subsection{Power Law}
-The degree histogram seems to the scale free pattern.
-
-\begin{figure}[!htbp]
+The degree histogram resembles the power law pattern. The fitted value power law exponent $\alpha \approx 1.452$, meaning that it does not decay quite as fast as most real-world networks. This was done with $\texttt{k\_min} = 1$ and a calculated standard error of $\sim 0.0013$.
+\begin{figure}[!b]
 \begin{center}
-    \includegraphics[scale=0.5]{power_law.png}
+    \includegraphics[scale=0.372]{power_law.png}
 \end{center}
-    \caption{Power law curve fit to degrees histogram.}
+    \caption{Power law curve fit to degrees distribution.}
     \label{fig:power_law}
 \end{figure}
+
+\subsection{Network Measures}
+The network's degree assortativity of $\sim -0.21$ means that the network is moderately disassortative, resembling more of a technological/biological network rather than a social network. $\sim 0.042$ is very low reciprocity for a real-world network, but for a dictionary makes sense. Dictionaries try to avoid immediately circular definitions, but are not always perfect.
+Finally, the global clustering coefficient is $\sim 0.215$, and there exists evidence of strong local clustering. This would make sense as synonyms and words dealing with the same subject would tend to cluster. This value is typical for social and biological networks. Overall, these networks are consistent with numbers found in real-world networks.
+
+\begin{table}[!hbtp]
+\centering
+\begin{tabular}{c c}
+\textbf{Measure} & \textbf{Value} \\ 
+\hline
+Degree Assortativity Coefficient & $\sim$ -0.210191 \\
+Reciprocity & $\sim$ 0.042064 \\
+Global Clustering Coefficient & $\sim$ 0.215269
+\end{tabular}
+\caption{Different network measures for the dictionary network.}
+\label{tab:network_measures}
+\end{table}
+
+\subsection{Giant Component and Potential Models}
+As previously discussed, there exists a giant component in the weak sense, as 99.4\% of the words belong to the giant weak component. There is not a giant component in the strong sense as only 27.04\% of nodes belong the largest strong component. The existence of the weak giant component helps to argue that the network contains features of real world networks.
+
+It is difficult to find a model that would incorporate all of the features characteristic of the dictionary network. One potential choice of model is a directed configuration model. This would allow us to specify that exact in-/out-degree sequences that we would expect and thus similar degree distributions and degree-based statistics.
+This model lacks, however, the desired clustering, reciprocity, and community structures that we have demonstrated.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Bibliography below
